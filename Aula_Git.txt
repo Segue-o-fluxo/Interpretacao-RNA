@@ -1,0 +1,8 @@
+ls - mostra as pastas do diretório
+cd - seleciona uma delas 
+git status - dá os status
+git add -  adcionar arquivos
+git clone -  clona o repositório do github
+git commit -m " comentário"-  dá o commit
+git push origin main - " você cria um arquivo no github de fato" 
+git pull origin main . "Você atualiza o seu git no seu computador "
