@@ -171,16 +171,25 @@ DropOut = R6Class("DropOut",
                               self$weights[[k]] = self$weights[[k]] - lr * grad$nabla_w[[k]]
                             }
                           },
-                          treina_modelo = function(lr=.1, n_iter=100) {
+                          treina_modelo = function(lr=.1, n_iter=100, early_stop = Inf) {
                             best_loss = Inf
                             best_weights = NULL
+                            int_sem_melhora =  0
                             for(i in seq_len(n_iter)) {
+                              
                               self$gradient_descent(lr)
                               pred_teste = self$fit(self$x_teste)
                               loss = self$square_loss(pred_teste, self$y_teste)
+                              cat("Epoch: ", i, "Loss: ", loss,"\n")
                               if(loss < best_loss) {
+                                int_sem_melhora =  0
                                 best_loss = loss
                                 best_weights = list(self$weights, self$biases)
+                              } else {
+                                int_sem_melhora = int_sem_melhora + 1
+                                if(int_sem_melhora >=early_stop){
+                                  break
+                                }
                               }
                             }
                             # restaura os melhores pesos
@@ -199,27 +208,9 @@ DropOut = R6Class("DropOut",
                           }
                         ))
 
-
-set.seed(2.2020)
-m.obs <- 100000
-dados <- tibble(x1.obs=runif(m.obs, -3, 3),
-                x2.obs=runif(m.obs, -3, 3)) %>%
-  mutate(mu=abs(x1.obs^3 - 30*sin(x2.obs) + 10),
-         y=rnorm(m.obs, mean=mu, sd=1))
-
-train_idx <- 1:80e3
-treino <- dados[train_idx,]
-treino_x <- as.matrix(treino[, 1:2])
-treino_y <- treino$y
-teste <- dados[-train_idx,]
-teste_x <- as.matrix(teste[, 1:2])
-teste_y <- teste$y
-
-
-
-
-ff = DropOut$new(treino_x, treino_y, teste_x, teste_y)
-ff$adiciona_camada(2, 0, 0, ativacao = "sigmoide", p_dropout = .8)$
-  adiciona_camada(1, 0, 0, p_dropout = .8)
-ff$treina_modelo()
-ff$pega_pesos()
+# 
+# ff = DropOut$new(treino_x, treino_y, teste_x, teste_y)
+# ff$adiciona_camada(2, 0, 0, ativacao = "sigmoide", p_dropout = .8)$
+#   adiciona_camada(1, 0, 0, p_dropout = .8)
+# ff$treina_modelo()
+# ff$pega_pesos()
