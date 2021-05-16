@@ -1,3 +1,5 @@
 *.tmp
 divisao.txt
 .Rproj.user
+*.Rhistory
+.ipynb_checkpoints
