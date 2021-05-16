@@ -6,8 +6,8 @@ library(latex2exp)
 
 
 ########## Importando os Dados ##########
-treino   <- readRDS("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Treino_Lista1.rds")
-teste    <- readRDS("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Teste_Lista1.rds")
+treino   <- readRDS("Treino_Lista1.rds")
+teste    <- readRDS("Teste_Lista1.rds")
 x_treino <- treino %>%
   select(x1.obs, x2.obs)
 x_teste  <- teste %>%
@@ -17,12 +17,12 @@ y_teste  <- teste$y
 
 
 ########## Importando as Redes ##########
-mod_ruim <- load_model_tf("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Rede Ruim")
-mod_bom  <- load_model_tf("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Rede Boa")
+mod_ruim <- load_model_tf("Rede Ruim")
+mod_bom  <- load_model_tf("Rede Boa")
 
 
 ########## Importando as Metricas ##########
-source("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Metricas.R")
+source("Metricas.R")
 
 
 ########## Procedimento 1: Assume erros i.i.d. ~ N(0, sigma^2) ##########

@@ -4,8 +4,8 @@ library(keras)
 
 
 ########## Importacao dos Dados de Treino e Teste ##########
-treino   <- readRDS("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Treino_Lista1.rds")
-teste    <- readRDS("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Teste_Lista1.rds")
+treino   <- readRDS("Treino_Lista1.rds")
+teste    <- readRDS("Teste_Lista1.rds")
 x_treino <- treino %>%
   select(x1.obs, x2.obs)
 x_teste  <- teste %>%
