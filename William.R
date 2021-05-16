@@ -4,7 +4,8 @@ library(keras)
 library(ggplot2)
 library(latex2exp)
 
-### Importacao dos Dados de Treino e Teste
+
+########## Importando os Dados ##########
 treino   <- readRDS("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Treino_Lista1.rds")
 teste    <- readRDS("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Teste_Lista1.rds")
 x_treino <- treino %>%
@@ -14,105 +15,120 @@ x_teste  <- teste %>%
 y_treino <- treino$y
 y_teste  <- teste$y
 
-### Ajuste da Rede Neural Ruim
-## Iniciamos um modelo sequencial
-mod1 <- keras_model_sequential()
-## Adicionamos as camadas
-mod1 %>%
-  layer_dense(units              = 2,
-              activation         = "sigmoid",
-              use_bias           = T,
-              kernel_initializer = initializer_constant(0),
-              bias_initializer   = initializer_constant(0),
-              input_shape        = ncol(x_treino)) %>%
-  layer_dense(units              = 1,
-              activation         = "linear",
-              use_bias           = T,
-              kernel_initializer = initializer_constant(0),
-              bias_initializer   = initializer_constant(0))
-## Definimos a função de perda e o otimizador
-mod1 %>%
-  compile(optimizer = optimizer_sgd(lr = 0.1),
-          loss      = "mse")
-## Ajustamos a rede usando o Keras
-inicio        <- Sys.time()
-mod1_resultado <- mod1 %>%
-  fit(x               = as.matrix(x_treino),
-      y               = y_treino,
-      batch_size      = nrow(x_treino),
-      epochs          = 100,
-      callbacks       = list(callback_early_stopping(patience             = 100,
-                                                     restore_best_weights = T)),
-      validation_data = list(x_val = as.matrix(x_teste), y_val = y_teste),
-      shuffle         = F)
-total_keras   <- Sys.time() - inicio
-## Obtendo previsoes com essa rede
-yhat1_treino <- mod1 %>% predict_on_batch(as.matrix(x_treino))
-yhat1_teste  <- mod1 %>% predict_on_batch(as.matrix(x_teste))
-## Calculo dos residuos de treino
-res1_treino  <- c(y_treino - yhat1_treino)
 
-### Procedimento 1: Assume erros i.i.d. ~ N(0, sigma^2)
-sigma2hat  <- var(res1_treino)
-## Treino
-li1_treino <- as.vector(yhat1_treino) - qnorm(.975)*sqrt(sigma2hat)
-ls1_treino <- as.vector(yhat1_treino) + qnorm(.975)*sqrt(sigma2hat)
-## Teste
-li1_teste  <- as.vector(yhat1_teste)  - qnorm(.975)*sqrt(sigma2hat)
-ls1_teste  <- as.vector(yhat1_teste)  + qnorm(.975)*sqrt(sigma2hat)
-## Cobertura media
-# Treino
-mean(li1_treino <= y_treino & y_treino <= ls1_treino) # 93,75%
-# Teste
-mean(li1_teste <= y_teste & y_teste <= ls1_teste) # 93,83%
-## Metrica do artigo
-# Treino
-# Teste
-## Grafico
-ind1_cob_teste  <- as.numeric(li1_teste <= y_teste & y_teste <= ls1_teste)
-dados_grid      <- x_teste
-dados_grid$ind1 <- as.factor(ind1_cob_teste)
-ggplot(dados_grid, aes(x1.obs, x2.obs)) +
-  geom_point(aes(colour = ind1), size = 2, shape = 15) +
-  coord_cartesian(expand = F) +
-  scale_colour_manual(breaks = c(0, 1), values = c("#A11D21", "black"), name = TeX("\\hat{Y}(X_1, X_2)")) + 
-  xlab(TeX("X_1")) + ylab(TeX("X_2"))
+########## Importando as Redes ##########
+mod_ruim <- load_model_tf("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Rede Ruim")
+mod_bom  <- load_model_tf("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Rede Boa")
 
-### Procedimento 2: Realiza bootstrap nao parametrico dos residuos
-## Treino
+
+########## Importando as Metricas ##########
+source("C:/Users/willi/Documents/UNB/8º Semestre/Tópicos em Estatística 1 - Redes Neurais/Seminários/Trabalho/Interpretacao-RNA/Metricas.R")
+
+
+########## Procedimento 1: Assume erros i.i.d. ~ N(0, sigma^2) ##########
+# Predicoes pontuais
+yhat_treino_ruim <- mod_ruim %>% predict_on_batch(as.matrix(x_treino)) %>% as.vector()
+yhat_treino_bom  <- mod_bom  %>% predict_on_batch(as.matrix(x_treino)) %>% as.vector()
+yhat_teste_ruim  <- mod_ruim %>% predict_on_batch(as.matrix(x_teste))  %>% as.vector()
+yhat_teste_bom   <- mod_bom  %>% predict_on_batch(as.matrix(x_teste))  %>% as.vector()
+# Residuos de treino
+res_treino_ruim  <- y_treino - yhat_treino_ruim
+res_treino_bom   <- y_treino - yhat_treino_bom
+# Estimativa da variancia dos erros
+sigma2hat_ruim <- var(res_treino_ruim)
+sigma2hat_bom  <- var(res_treino_bom)
+# Limites inferiores
+linf_treino_ruim <- yhat_treino_ruim - qnorm(0.975)*sqrt(sigma2hat_ruim)
+linf_treino_bom  <- yhat_treino_bom  - qnorm(0.975)*sqrt(sigma2hat_bom)
+linf_teste_ruim  <- yhat_teste_ruim  - qnorm(0.975)*sqrt(sigma2hat_ruim)
+linf_teste_bom   <- yhat_teste_bom   - qnorm(0.975)*sqrt(sigma2hat_bom)
+# Limites superiores
+lsup_treino_ruim <- yhat_treino_ruim + qnorm(0.975)*sqrt(sigma2hat_ruim)
+lsup_treino_bom  <- yhat_treino_bom  + qnorm(0.975)*sqrt(sigma2hat_bom)
+lsup_teste_ruim  <- yhat_teste_ruim  + qnorm(0.975)*sqrt(sigma2hat_ruim)
+lsup_teste_bom   <- yhat_teste_bom   + qnorm(0.975)*sqrt(sigma2hat_bom)
+# Cobertura media
+(cob_treino_ruim <- cob_media(ind_cob(y_treino, linf_treino_ruim, lsup_treino_ruim)))
+(cob_treino_bom  <- cob_media(ind_cob(y_treino, linf_treino_bom,  lsup_treino_bom)))
+(cob_teste_ruim  <- cob_media(ind_cob(y_teste,  linf_teste_ruim,  lsup_teste_ruim)))
+(cob_teste_bom   <- cob_media(ind_cob(y_teste,  linf_teste_bom,   lsup_teste_bom)))
+# CWC
+R_treino         <- max(y_treino) - min(y_treino)
+R_teste          <- max(y_teste)  - min(y_teste)
+(cwc_treino_ruim <- cwc(amp_media_norm(linf_treino_ruim, lsup_treino_ruim, R_treino), cob_treino_ruim))
+(cwc_treino_bom  <- cwc(amp_media_norm(linf_treino_bom,  lsup_treino_bom,  R_treino), cob_treino_bom))
+(cwc_teste_ruim  <- cwc(amp_media_norm(linf_teste_ruim,  lsup_teste_ruim,  R_teste),  cob_teste_ruim))
+(cwc_teste_bom   <- cwc(amp_media_norm(linf_teste_bom,   lsup_teste_bom,   R_teste),  cob_teste_bom))
+# Funcao grafico da cobertura
+grafico_cob <- function(ruim) {
+  ind <- if (ruim) "ind_ruim" else "ind_bom"
+  ggplot(dados_grid, aes(x1.obs, x2.obs)) +
+    geom_point(aes_string(colour = ind), size = 3) +
+    coord_cartesian(expand = F) +
+    scale_colour_manual(breaks = c(0, 1), values = c("#A11D21", "Black"), name = "", labels = c("Fora", "Dentro")) + 
+    xlab(TeX("X_1")) + ylab(TeX("X_2"))
+}
+# Grafico da cobertura
+dados_grid          <- x_teste
+dados_grid$ind_ruim <- as.factor(as.numeric(ind_cob(y_teste, linf_teste_ruim, lsup_teste_ruim)))
+dados_grid$ind_bom  <- as.factor(as.numeric(ind_cob(y_teste, linf_teste_bom,  lsup_teste_bom)))
+grafico_cob(ruim = T)
+grafico_cob(ruim = F)
+
+
+########## Procedimento 2: Realiza bootstrap nao parametrico dos residuos ##########
+# Bootstrap dos residuos
 set.seed(1)
-boot_res  <- matrix(sample(res1_treino, 1000*nrow(treino), T), nrow(treino))
-li1_treino <- numeric(nrow(treino))
-ls1_treino <- numeric(nrow(treino))
+boot_res_treino_ruim <- matrix(sample(res_treino_ruim, 1000*nrow(treino), T), nrow(treino))
+boot_res_treino_bom  <- matrix(sample(res_treino_bom,  1000*nrow(treino), T), nrow(treino))
+boot_res_teste_ruim  <- matrix(sample(res_treino_ruim, 1000*nrow(teste), T),  nrow(teste))
+boot_res_teste_bom   <- matrix(sample(res_treino_bom,  1000*nrow(teste), T),  nrow(teste))
+# Bootstrap dos valores previstos
+boot_prev_treino_ruim <- boot_res_treino_ruim + yhat_treino_ruim
+boot_prev_treino_bom  <- boot_res_treino_bom  + yhat_treino_bom
+boot_prev_teste_ruim  <- boot_res_teste_ruim  + yhat_teste_ruim
+boot_prev_teste_bom   <- boot_res_teste_bom   + yhat_teste_bom
+# Limites de treino
+linf_treino_ruim <- numeric(nrow(treino))
+linf_treino_bom  <- numeric(nrow(treino))
+lsup_treino_ruim <- numeric(nrow(treino))
+lsup_treino_bom  <- numeric(nrow(treino))
 for(i in 1:nrow(treino)) {
-  boot_prev    <- c(boot_res[i,]) + yhat1_treino[i]
-  li1_treino[i] <- quantile(boot_prev, .025)
-  ls1_treino[i] <- quantile(boot_prev, .975)
+  quantis_treino_ruim   <- quantile(boot_prev_treino_ruim[i,], c(0.025, 0.975))
+  quantis_treino_bom    <- quantile(boot_prev_treino_bom[i,],  c(0.025, 0.975))
+  linf_treino_ruim[i]   <- quantis_treino_ruim[1]
+  linf_treino_bom[i]    <- quantis_treino_bom[1]
+  lsup_treino_ruim[i]   <- quantis_treino_ruim[2]
+  lsup_treino_bom[i]    <- quantis_treino_bom[2]
 }
-## Teste
-set.seed(1)
-boot_res  <- matrix(sample(res1_treino, 1000*nrow(teste), T), nrow(teste))
-li1_teste <- numeric(nrow(teste))
-ls1_teste <- numeric(nrow(teste))
+# Limites de teste
+linf_teste_ruim <- numeric(nrow(teste))
+linf_teste_bom  <- numeric(nrow(teste))
+lsup_teste_ruim <- numeric(nrow(teste))
+lsup_teste_bom  <- numeric(nrow(teste))
 for(i in 1:nrow(teste)) {
-  boot_prev    <- c(boot_res[i,]) + yhat1_teste[i]
-  li1_teste[i] <- quantile(boot_prev, .025)
-  ls1_teste[i] <- quantile(boot_prev, .975)
+  quantis_teste_ruim   <- quantile(boot_prev_teste_ruim[i,], c(0.025, 0.975))
+  quantis_teste_bom    <- quantile(boot_prev_teste_bom[i,],  c(0.025, 0.975))
+  linf_teste_ruim[i]   <- quantis_teste_ruim[1]
+  linf_teste_bom[i]    <- quantis_teste_bom[1]
+  lsup_teste_ruim[i]   <- quantis_teste_ruim[2]
+  lsup_teste_bom[i]    <- quantis_teste_bom[2]
 }
-## Cobertura media
-# Treino
-mean(li1_treino <= y_treino & y_treino <= ls1_treino) # 94,80%
-# Teste
-mean(li1_teste <= y_teste & y_teste <= ls1_teste) # 94,93%
-## Metrica do artigo
-# Treino
-# Teste
-## Grafico
-ind1_cob_teste  <- as.numeric(li1_teste <= y_teste & y_teste <= ls1_teste)
-dados_grid      <- x_teste
-dados_grid$ind1 <- as.factor(ind1_cob_teste)
-ggplot(dados_grid, aes(x1.obs, x2.obs)) +
-  geom_point(aes(colour = ind1), size = 2, shape = 15) +
-  coord_cartesian(expand = F) +
-  scale_colour_manual(breaks = c(0, 1), values = c("#A11D21", "black"), name = TeX("\\hat{Y}(X_1, X_2)")) + 
-  xlab(TeX("X_1")) + ylab(TeX("X_2"))
+# Cobertura media
+(cob_treino_ruim <- cob_media(ind_cob(y_treino, linf_treino_ruim, lsup_treino_ruim)))
+(cob_treino_bom  <- cob_media(ind_cob(y_treino, linf_treino_bom,  lsup_treino_bom)))
+(cob_teste_ruim  <- cob_media(ind_cob(y_teste,  linf_teste_ruim,  lsup_teste_ruim)))
+(cob_teste_bom   <- cob_media(ind_cob(y_teste,  linf_teste_bom,   lsup_teste_bom)))
+# CWC
+R_treino         <- max(y_treino) - min(y_treino)
+R_teste          <- max(y_teste)  - min(y_teste)
+(cwc_treino_ruim <- cwc(amp_media_norm(linf_treino_ruim, lsup_treino_ruim, R_treino), cob_treino_ruim))
+(cwc_treino_bom  <- cwc(amp_media_norm(linf_treino_bom,  lsup_treino_bom,  R_treino), cob_treino_bom))
+(cwc_teste_ruim  <- cwc(amp_media_norm(linf_teste_ruim,  lsup_teste_ruim,  R_teste),  cob_teste_ruim))
+(cwc_teste_bom   <- cwc(amp_media_norm(linf_teste_bom,   lsup_teste_bom,   R_teste),  cob_teste_bom))
+# Grafico da cobertura
+dados_grid          <- x_teste
+dados_grid$ind_ruim <- as.factor(as.numeric(ind_cob(y_teste, linf_teste_ruim, lsup_teste_ruim)))
+dados_grid$ind_bom  <- as.factor(as.numeric(ind_cob(y_teste, linf_teste_bom,  lsup_teste_bom)))
+grafico_cob(ruim = T)
+grafico_cob(ruim = F)
