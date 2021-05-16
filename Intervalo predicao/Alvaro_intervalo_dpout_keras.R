@@ -1,6 +1,22 @@
 library(keras)
+library(tidyverse)
+library(latex2exp)
 
 mod1 <- keras_model_sequential()
+
+treino   <- readRDS("../Treino_Lista1.rds")
+teste    <- readRDS("../Teste_Lista1.rds")
+x_treino <- treino %>%
+  select(x1.obs, x2.obs) %>% as.matrix()
+x_teste  <- teste %>%
+  select(x1.obs, x2.obs) %>% as.matrix()
+y_treino <- treino$y
+y_teste  <- teste$y
+
+numero_predicoes = 100
+
+numero_treinos = 100
+
 ## Adicionamos as camadas
 mod1 %>%
   layer_dense(units              = 2,
@@ -20,7 +36,6 @@ mod1 %>%
   compile(optimizer = optimizer_sgd(lr = 0.1),
           loss      = "mse")
 ## Ajustamos a rede usando o Keras
-inicio        <- Sys.time()
 mod1_resultado <- mod1 %>%
   fit(x               = as.matrix(x_treino),
       y               = y_treino,

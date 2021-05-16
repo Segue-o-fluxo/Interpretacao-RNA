@@ -6,8 +6,8 @@ library(latex2exp)
 source("rede_dropout.R")
 
 ### Importacao dos Dados de Treino e Teste
-treino   <- readRDS("Treino_Lista1.rds")
-teste    <- readRDS("Teste_Lista1.rds")
+treino   <- readRDS("../Treino_Lista1.rds")
+teste    <- readRDS("../Teste_Lista1.rds")
 x_treino <- treino %>%
   select(x1.obs, x2.obs) %>% as.matrix()
 x_teste  <- teste %>%
