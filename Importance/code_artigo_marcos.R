@@ -1,4 +1,3 @@
-setwd("C:\\Users\\marco\\Desktop\\Estatistica\\Semestres\\Semestre 8\\Tópicos em Estatística 1 (Deep Learning)\\Trabalho")
 pacman::p_load("neuralnet", 
                "tidyverse", 
                "latex2exp", 
@@ -11,7 +10,7 @@ pacman::p_load("neuralnet",
                "keras", 
                "cowplot")
 
-# Método de retirada de covariável do artigo ----
+# M?todo de retirada de covari?vel do artigo ----
 cols = c("word_freq_make",         
   "word_freq_address",
   "word_freq_all",          
@@ -70,7 +69,7 @@ cols = c("word_freq_make",
   "capital_run_length_longest", 
   "capital_run_length_total",
   "spam")
-df_spam = read.csv("spambase.data", header = FALSE)
+df_spam = read.csv("Importance/spambase.data", header = FALSE)
 colnames(df_spam) = cols
 
 metrics = function(x){
@@ -125,14 +124,14 @@ for (name in covariaveis){
   }
   
   else{
-    # definição dos conjuntos de dados, com exclusão de covariável
+    # defini??o dos conjuntos de dados, com exclus?o de covari?vel
     x = as.matrix(df_treino_scale %>% select(-c(name)))
     dimnames(x) = NULL
     x_val = as.matrix(df_teste_scale %>% select(-c(name)))
     dimnames(x_val) = NULL
     }
   
-  # definição da rede neural
+  # defini??o da rede neural
   mod1 <- keras_model_sequential()
   mod1 %>%
     layer_dense(units = 3,
@@ -153,7 +152,7 @@ for (name in covariaveis){
         validation_data = list(x_val, y_val),
         callbacks = list(parada))
   
-  # cálculo de métricas de avaliação
+  # c?lculo de m?tricas de avalia??o
   target_hat = mod1 %>% 
     predict(x_val) %>% 
     round() %>% 
@@ -166,9 +165,9 @@ for (name in covariaveis){
 b = Sys.time(); b-a
 df_report
 
-# Rank das covariáveis
+# Rank das covari?veis
 comparison = df_report[1,]
-### no artigo não aparece o seguinte caso: OA < , FP > , FN <
+### no artigo n?o aparece o seguinte caso: OA < , FP > , FN <
 teste = df_report %>% 
   slice(2:58) %>% 
   mutate(rank = case_when(acc_m > comparison$acc_m &
@@ -189,14 +188,14 @@ important_vars = teste %>%
   select(exclusion) %>% 
   .[[1]]
 
-# definição dos conjuntos de dados, com exclusão de covariável
+# defini??o dos conjuntos de dados, com exclus?o de covari?vel
 x = as.matrix(df_treino_scale %>% select(c(important_vars)))
 dimnames(x) = NULL
 x_val = as.matrix(df_teste_scale %>% select(c(important_vars)))
 dimnames(x_val) = NULL
 
 
-# definição da rede neural
+# defini??o da rede neural
 mod1 <- keras_model_sequential()
 mod1 %>%
   layer_dense(units = 3,
@@ -217,7 +216,7 @@ ajuste = mod1 %>%
       validation_data = list(x_val, y_val),
       callbacks = list(parada))
 
-# cálculo de métricas de avaliação
+# c?lculo de m?tricas de avalia??o
 target_hat = mod1 %>% 
   predict(x_val) %>% 
   round() %>% 
