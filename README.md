@@ -2,7 +2,7 @@
 
 ## Interpretação e incerteza em Rede Neurais Artificiais
 
-Trabalho de Tópicos em redes neurais ministrado pelo Professor Guilherme Rodrigues
+Trabalho de Tópicos em redes neurais ministrado pelo Professor Guilherme Rodrigues.
 
 Integrantes do grupo:
  - Álvaro Kothe
@@ -14,9 +14,9 @@ Integrantes do grupo:
   - Interpretação
   - Incerteza
   
-  A apresentação em PowerPoint se encontra no arquivo [Topicos - Interpretacao e Incerteza em RNA](Topicos&#32;-&#32;Interpretacao&#32;e&#32;Incerteza&#32;em&#32;RNA.pptx)
+  A apresentação em PowerPoint se encontra no arquivo [Topicos - Interpretacao e Incerteza em RNA](Topicos&#32;-&#32;Interpretacao&#32;e&#32;Incerteza&#32;em&#32;RNA.pptx).
   
-  Os principais artigos utilizados se encontram em [artigos](artigos)
+  Os principais artigos utilizados se encontram em [artigos](artigos).
   
   ### Interpretação
   
