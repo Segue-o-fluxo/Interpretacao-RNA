@@ -1,0 +1,50 @@
+- utilizar a ultima camada da RNA para montar um glm
+- Recomenda utilizar um banco real, mas a decisão é nossa
+- Importancia de variavel: 
+	- remover uma delas e ver o impacto
+	- permutação de coluna
+	- Gráfico sankey (https://www.r-graph-gallery.com/sankey-diagram.html)
+
+v(l), v(l-1) -> penultima camada
+
+v(l-1) = b0 + b1x_1 + ...
+
+v(l-1) ~ N(., .)
+
+Gerar os dados: gerar os dados e salvar (.rds)
+	- didática da lista 1
+Banco de dados real: y~real de regressão
+
+Banco de treino e teste fixos
+
+ajustar 2 tipos de redes
+	- Uma simples (ruim)
+	- Uma complexa (usando o keras e bem ajustado
+
+gera 8 valores pra cada
+	- treino e teste, rede boa e ruim, cobertura e métrica do artigo
+.>
+Normal (pressuposto? normalidade, ver resíduo) - William
+Boot não paramétrico - William
+Dropout - Alvaro
+	- Tentar usar a minha classe
+GLM na ultima camada - William
+	- Descobrir como puxar uma previsão de uma camada especifica
+BNN - Alvaro
+Delta * (facultativo) - Quem sobrar
+
+
+Gerar 2 métricas :
+	- Cobertura e Métrica do artigo de BNN
+Gráfico da cobertura
+	- Binário (dentro ou fora e as covariáveis)
+
+
+links:
+https://towardsdatascience.com/feature-importance-with-neural-network-346eb6205743
+
+https://arxiv.org/pdf/1605.07678.pdf?source=post_page---------------------------
+
+https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=374355&casa_token=1vMuARpJVXwAAAAA:dcR3cYer30op0fOoO_qQKRISaGXQCmDUJfwKkkxO8hWE8UoE6hHAGJy1cLWiPGpGN5VynIoo&tag=1
+
+
