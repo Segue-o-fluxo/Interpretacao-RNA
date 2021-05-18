@@ -18,8 +18,10 @@ y_teste  <- teste$y
 
 
 ########## Importando as Redes ##########
-mod_ruim <- load_model_tf("Rede Ruim")
-mod_bom  <- load_model_tf("Rede Boa")
+mod_ruim   <- load_model_tf("Rede Ruim")
+mod_bom    <- load_model_tf("Rede Boa")
+mod_ruim_d <- load_model_tf("Rede Ruim Dropout")
+mod_bom_d  <- load_model_tf("Rede Boa Dropout")
 
 
 ########## Importando as Metricas ##########
@@ -102,7 +104,6 @@ for(i in 1:nrow(teste)) {
 (cob_teste_ruim  <- cob_media(ind_cob(y_teste,  linf_teste_ruim,  lsup_teste_ruim)))
 (cob_teste_bom   <- cob_media(ind_cob(y_teste,  linf_teste_bom,   lsup_teste_bom)))
 # CWC
-R_teste          <- max(y_teste)  - min(y_teste)
 (cwc_teste_ruim  <- cwc(amp_media_norm(linf_teste_ruim,  lsup_teste_ruim,  R_teste),  cob_teste_ruim))
 (cwc_teste_bom   <- cwc(amp_media_norm(linf_teste_bom,   lsup_teste_bom,   R_teste),  cob_teste_bom))
 # Grafico da cobertura
@@ -116,7 +117,42 @@ resultados <- rbind(resultados, data.frame(Metodo    = rep("Bootstrap NP", 2),
                                            Rede      = c("Ruim", "Boa"),
                                            Cobertura = c(cob_teste_ruim, cob_teste_bom),
                                            CWC       = c(cwc_teste_ruim, cwc_teste_bom)))
-# Apresentação dos Resultados
+
+
+########## Procedimento 3: Dropout ##########
+# Dropout
+predicao_dropout <- function(modelo, matriz_pred) {
+  out <- as.matrix(modelo(matriz_pred, training = T))
+  return(out)
+}
+# Limites
+limites <- function(modelo, x, n_preds = 100) {
+  preds   <- do.call("cbind", lapply(seq_len(n_preds), function(i) predicao_dropout(modelo, x)))
+  limites <- apply(preds, 1, quantile, p = c(.025, .975))
+  return(limites)
+}
+limites_ruim <- limites(mod_ruim_d, as.matrix(x_teste))
+limites_bom  <- limites(mod_bom_d, as.matrix(x_teste))
+# Cobertura media
+(cob_teste_ruim  <- cob_media(ind_cob(y_teste,  limites_ruim[1,],  limites_ruim[2,])))
+(cob_teste_bom   <- cob_media(ind_cob(y_teste,  limites_bom[1,],   limites_bom[2,])))
+# CWC
+(cwc_teste_ruim  <- cwc(amp_media_norm(limites_ruim[1,],  limites_ruim[2,],  R_teste),  cob_teste_ruim))
+(cwc_teste_bom   <- cwc(amp_media_norm(limites_bom[1,],   limites_bom[2,],   R_teste),  cob_teste_bom))
+# Grafico da cobertura
+dados_grid          <- x_teste
+dados_grid$ind_ruim <- as.factor(as.numeric(ind_cob(y_teste, limites_ruim[1,], limites_ruim[2,])))
+dados_grid$ind_bom  <- as.factor(as.numeric(ind_cob(y_teste, limites_bom[1,],  limites_bom[2,])))
+grafico_cob(ruim = T)
+grafico_cob(ruim = F)
+# Adicionando resultados
+resultados <- rbind(resultados, data.frame(Metodo    = rep("Dropout", 2),
+                                           Rede      = c("Ruim", "Boa"),
+                                           Cobertura = c(cob_teste_ruim, cob_teste_bom),
+                                           CWC       = c(cwc_teste_ruim, cwc_teste_bom)))
+
+
+########## Apresentação dos Resultados ##########
 resultados %>%
   mutate(across(where(is.numeric), round, digits = 3)) %>%
   datatable()
