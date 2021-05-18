@@ -7,8 +7,8 @@ library(DT)
 
 
 ########## Importando os Dados ##########
-treino   <- readRDS("Treino_Lista1.rds")
-teste    <- readRDS("Teste_Lista1.rds")
+treino   <- readRDS("Incerteza/Treino_Lista1.rds")
+teste    <- readRDS("Incerteza/Teste_Lista1.rds")
 x_treino <- treino %>%
   select(x1.obs, x2.obs)
 x_teste  <- teste %>%
@@ -18,14 +18,14 @@ y_teste  <- teste$y
 
 
 ########## Importando as Redes ##########
-mod_ruim   <- load_model_tf("Rede Ruim")
-mod_bom    <- load_model_tf("Rede Boa")
-mod_ruim_d <- load_model_tf("Rede Ruim Dropout")
-mod_bom_d  <- load_model_tf("Rede Boa Dropout")
+mod_ruim   <- load_model_tf("Incerteza/Rede Ruim")
+mod_bom    <- load_model_tf("Incerteza/Rede Boa")
+mod_ruim_d <- load_model_tf("Incerteza/Rede Ruim Dropout")
+mod_bom_d  <- load_model_tf("Incerteza/Rede Boa Dropout")
 
 
 ########## Importando as Metricas ##########
-source("Metricas.R")
+source("Incerteza/Metricas.R")
 
 
 ########## Dataframe para comparar resultados ##########

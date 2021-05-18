@@ -15,4 +15,4 @@ ggplot(df, aes(x, y)) +
   geom_line(data = pi, aes(y = lwr), linetype = "longdash", size = .75, colour = "red") +
   geom_line(data = pi, aes(y = upr), linetype = "longdash", size = .75, colour = "red") +
   theme_classic()
-ggsave("PIxCI.png", width = 158, height = 93, units = "mm")
+ggsave("Incerteza/PIxCI.png", width = 158, height = 93, units = "mm")

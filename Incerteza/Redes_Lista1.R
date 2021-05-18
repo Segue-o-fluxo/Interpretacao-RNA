@@ -4,8 +4,8 @@ library(keras)
 
 
 ########## Importacao dos Dados de Treino e Teste ##########
-treino   <- readRDS("Treino_Lista1.rds")
-teste    <- readRDS("Teste_Lista1.rds")
+treino   <- readRDS("Incerteza/Treino_Lista1.rds")
+teste    <- readRDS("Incerteza/Teste_Lista1.rds")
 x_treino <- treino %>%
   select(x1.obs, x2.obs)
 x_teste  <- teste %>%
@@ -40,7 +40,7 @@ mod_ruim %>%
                                                      restore_best_weights = T)),
       validation_data = list(x_val = as.matrix(x_teste), y_val = y_teste),
       shuffle         = F)
-mod_ruim %>% save_model_tf("Rede Ruim")
+mod_ruim %>% save_model_tf("Incerteza/Rede Ruim")
 
 
 ########## Rede Neural Ruim com Dropout ##########
@@ -70,7 +70,7 @@ mod_ruim_d %>%
                                                      restore_best_weights = T)),
       validation_data = list(x_val = as.matrix(x_teste), y_val = y_teste),
       shuffle         = F)
-mod_ruim_d %>% save_model_tf("Rede Ruim Dropout")
+mod_ruim_d %>% save_model_tf("Incerteza/Rede Ruim Dropout")
 
 
 ########## Rede Neural Boa ##########
@@ -109,7 +109,7 @@ mod_bom %>%
                                                      restore_best_weights = T)),
       validation_data = list(x_val = as.matrix(x_teste), y_val = y_teste),
       shuffle         = T)
-mod_bom %>% save_model_tf("Rede Boa")
+mod_bom %>% save_model_tf("Incerteza/Rede Boa")
 
 
 ########## Rede Neural Boa com Dropout ##########
@@ -151,4 +151,4 @@ mod_bom_d %>%
                                                      restore_best_weights = T)),
       validation_data = list(x_val = as.matrix(x_teste), y_val = y_teste),
       shuffle         = T)
-mod_bom_d %>% save_model_tf("Rede Boa Dropout")
+mod_bom_d %>% save_model_tf("Incerteza/Rede Boa Dropout")
